@@ -10,9 +10,10 @@ namespace tetris
     {
         up, right, down, left
     }
+    
     public struct Point
     {
-        int X, Y;
+        public int X, Y;
         public Point(int x, int y)
         {
             X = x;
@@ -23,13 +24,29 @@ namespace tetris
     {
         empty, block
     }
+    public class FigureEventArgs:EventArgs
+    {
+
+    }
     class Figure
     {
-        int size;
-        public Block[,] figureMap;
-        public Point coord;
-        public Rotation rotatPos = Rotation.right;
+        public delegate  void FigureMoveEndedEventHandler(object Sender, EventArgs e);
+        public event FigureMoveEndedEventHandler FigureEndedMoving;    
+        public Figure()
+        {
+
+        }
+        public Block this[int Yindex, int Xindex]
+        {
+            get { return figureMap[Yindex, Xindex]; }
+        }
+        public int Size;
+        Block[,] figureMap;
+        private Point coord;
         public ConsoleColor figureColor;
+        public readonly char FigureType;
+        public Point Coord { get => coord; set => coord = value; }
+
         public Figure(char fType)
         {
             switch (fType)
@@ -37,29 +54,29 @@ namespace tetris
                 case 'I':
                     {
                         figureColor = ConsoleColor.DarkCyan;
-                        figureMap = new Block[4, 4] {  { Block.block, 0, 0, 0 },
-                                                       { Block.block, 0, 0, 0 },
-                                                       { Block.block, 0, 0, 0 },
-                                                       { Block.block, 0, 0, 0 } };
-                        size = 4;
+                        figureMap = new Block[4, 4] {  { 0, Block.block,  0, 0 },
+                                                       { 0, Block.block,  0, 0 },
+                                                       { 0, Block.block,  0, 0 },
+                                                       { 0, Block.block,  0, 0 } };
+                        Size = 4;
                         break;
                     }
                 case 'J':
                     {
                         figureColor = ConsoleColor.DarkBlue;
-                        figureMap = new Block[3, 3] {  { 0,             0,           0, },
-                                                       { Block.block,   0,           0, },
-                                                       { Block.block, Block.block, Block.block} };
-                        size = 3;
+                        figureMap = new Block[3, 3] {  { Block.block,   0,           0, },
+                                                       { Block.block, Block.block, Block.block},
+                                                       { 0,             0,           0, }};
+                        Size = 3;
                         break;
                     }
                 case 'L':
                     {
                         figureColor = ConsoleColor.DarkYellow;
-                        figureMap = new Block[3, 3] {  { 0,             0,           0 },
-                                                       { 0,             0,         Block.block },
-                                                       { Block.block, Block.block, Block.block } };
-                        size = 3;
+                        figureMap = new Block[3, 3] {  { 0,             0,         Block.block },
+                                                       { Block.block, Block.block, Block.block },
+                                                       { 0,             0,           0 }};
+                        Size = 3;
                         break;
                     }
                 case 'O':
@@ -70,76 +87,121 @@ namespace tetris
                             {Block.block,Block.block },
                             {Block.block,Block.block }
                         };
-                        size = 2;
+                        Size = 2;
                         break;
                     }
                 case 'S':
                     {
                         figureColor = ConsoleColor.DarkGreen;
-                        figureMap = new Block[3, 3] { { 0,               0,              0 },
-                                                      { 0,           Block.block, Block.block},
-                                                      { Block.block, Block.block, 0} };
-                        size = 3;
+                        figureMap = new Block[3, 3] { { 0,           Block.block, Block.block},
+                                                      { Block.block, Block.block, 0},
+                                                      { 0,               0,              0 }};
+                        Size = 3;
                         break;
                     }
                 case 'T':
                     {
                         figureColor = ConsoleColor.DarkMagenta;
-                        figureMap = new Block[3, 3] { { 0,               0,              0 },
-                                                      { 0,           Block.block,        0 },
-                                                      { Block.block, Block.block, Block.block} };
-                        size = 3;
+                        figureMap = new Block[3, 3] { { 0,           Block.block,        0 },
+                                                      { Block.block, Block.block, Block.block},
+                                                      { 0,               0,              0 }};
+                        Size = 3;
                         break;
                     }
                 case 'Z':
                     {
                         figureColor = ConsoleColor.DarkRed;
-                        figureMap = new Block[3, 3] { { 0,               0,              0 },
-                                                      { Block.block, Block.block,        0 },
-                                                      { 0           , Block.block, Block.block} };
-                        size = 3;
+                        figureMap = new Block[3, 3] { { Block.block, Block.block,        0 },
+                                                      { 0           , Block.block, Block.block},
+                                                      { 0,               0,              0 }};
+                        Size = 3;
                         break;
                     }
             }
-            coord = new Point(5, 0);
+            FigureType = fType;
+            Coord = new Point(5, 0);
         }
-        public void rotate(Rotation direction)
+        public Figure(Block[,] map,Point coords,int arrsize)
         {
-            switch(direction)
+            figureMap = map;
+            coord = coords;
+            Size = arrsize;
+        }
+        public void MoveTo(Rotation direction,TetrisGame game)
+        {
+            Figure futurePos = new Figure();
+            switch (direction)
             {
                 case Rotation.left:
                     {
-                        Block[,] copy = (Block[,])figureMap.Clone();
-                        for (int i=0;i<size;i++)
+                        futurePos = new Figure(figureMap, new Point(coord.X - 1, coord.Y), Size);
+                        break;
+                    }
+
+                case Rotation.right:
+                    {
+                        futurePos = new Figure(figureMap, new Point(coord.X + 1, coord.Y), Size);
+                        break;
+                    }
+
+                case Rotation.down:
+                    {
+                        futurePos = new Figure(figureMap, new Point(coord.X , coord.Y + 1), Size);
+                        break;
+                    }
+            }
+            if (!game.HasColision(futurePos))
+            {
+                PaintFigureINBlack();
+                coord = futurePos.coord;
+                PrintFigure();
+            }
+            else if (direction==Rotation.down&& game.HasColision(futurePos))
+            {
+                game.landed = true;
+            }
+        }
+        public void rotate(Rotation direction,TetrisGame game)
+        {
+            Block[,] copy = (Block[,])figureMap.Clone();
+            Block[,] futurePos = (Block[,])figureMap.Clone();
+            switch (direction)
+            {
+                case Rotation.left:
+                    {
+                        for (int i=0;i<Size;i++)
                         {
-                            for (int j =0;j<size;j++)
+                            for (int j =0;j<Size;j++)
                             {
-                                figureMap[i, j] = copy[size-1-j,i];
+                                futurePos[i, j] = copy[Size-1-j,i];
                             }
                         }
                         break;
                     }
                 case Rotation.right:
                     {
-                        Block[,] copy = (Block[,])figureMap.Clone();
-                        for (int i = size-1; i >=0; i--)
+                        for (int i = Size-1; i >=0; i--)
                         {
-                            for (int j = size-1; j >=0 ; j--)
+                            for (int j = Size-1; j >=0 ; j--)
                             {
-                                figureMap[i, j] = copy[j, size-1-i];
+                                futurePos[i, j] = copy[j, Size-1-i];
                             }
                         }
                         break;
                     }
+            }
+            if (!game.HasColision(new Figure(futurePos, coord,Size)))
+            {
+                figureMap = (Block[,])futurePos.Clone();
             }
         }
         public void Print()
         {
             ConsoleColor prevcolor = Console.BackgroundColor;
             Console.Clear();
-            for (int i=0;i<size;i++)
+            for (int i=0;i<Size;i++)
             {
-                for (int j=0;j<size; j++)
+                for (int j=0;j<Size; j++)
                 {
                     switch(figureMap[i,j])
                     {
@@ -159,6 +221,38 @@ namespace tetris
                 }
                 Console.Write("\n");
             }
+        }
+        void PaintFigureINBlack()
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (this[i, j] == Block.block)
+                    {
+                        Console.SetCursorPosition(coord.X * 2+j*2, coord.Y + i);
+                        Console.Write("  ");
+                    }
+                }
+            }
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+        void PrintFigure()
+        {
+            Console.BackgroundColor = figureColor;
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (this[i, j] == Block.block)
+                    {
+                        Console.SetCursorPosition(coord.X * 2 + j * 2, coord.Y + i);
+                        Console.Write("  ");
+                    }
+                }
+            }
+            Console.BackgroundColor = ConsoleColor.Black;
         }
         void Swap(ref Block a,ref Block b)
         {

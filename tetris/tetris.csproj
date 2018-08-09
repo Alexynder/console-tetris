@@ -45,6 +45,7 @@
     <Compile Include="Figure.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TetrisGame.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
