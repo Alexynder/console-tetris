@@ -30,8 +30,6 @@ namespace tetris
     }
     class Figure
     {
-        public delegate  void FigureMoveEndedEventHandler(object Sender, EventArgs e);
-        public event FigureMoveEndedEventHandler FigureEndedMoving;    
         public Figure()
         {
 
@@ -192,7 +190,9 @@ namespace tetris
             }
             if (!game.HasColision(new Figure(futurePos, coord,Size)))
             {
+                PaintFigureINBlack();
                 figureMap = (Block[,])futurePos.Clone();
+                PrintFigure();
             }
         }
         public void Print()
@@ -222,7 +222,7 @@ namespace tetris
                 Console.Write("\n");
             }
         }
-        void PaintFigureINBlack()
+        public void PaintFigureINBlack()
         {
             Console.BackgroundColor = ConsoleColor.Black;
             for (int i = 0; i < Size; i++)
@@ -238,7 +238,7 @@ namespace tetris
             }
             Console.BackgroundColor = ConsoleColor.Black;
         }
-        void PrintFigure()
+       public void PrintFigure()
         {
             Console.BackgroundColor = figureColor;
             for (int i = 0; i < Size; i++)

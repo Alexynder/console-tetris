@@ -8,9 +8,12 @@ namespace tetris
 {
     class TetrisGame
     {
+        bool cantMove = false;
+        int deltaX = 5;
         public bool landed = false;
         Block[,] gameField;
         public int score;
+        public int scoreDelta = 100;
         ConsoleColor[,] colorData;
         private readonly char[] blockTypes = { 'I', 'J', 'L', 'O', 'S', 'T', 'Z' };
         public Figure NextFigure;
@@ -22,7 +25,7 @@ namespace tetris
             {
                 for (int j=0;j<f.Size;j++)
                 {
-                    if (gameField[i + f.Coord.Y, j + f.Coord.X] == Block.block && f[i, j] == Block.block)
+                    if (gameField[i + f.Coord.Y, j + f.Coord.X+deltaX+1] == Block.block && f[i, j] == Block.block)
                         return true;
                 }
             }
@@ -30,10 +33,15 @@ namespace tetris
         }
         public TetrisGame()
         {
-            gameField = new Block[21, 10];
-            for (int i = 0; i < 10; i++)
+            gameField = new Block[30, 20];
+            for (int i = 0; i < 20; i++)
                 gameField[20, i] = Block.block;
-            colorData = new ConsoleColor[21, 10];
+            for (int i = 0; i < 22; i++)
+            {
+                gameField[i, deltaX] = Block.block;
+                gameField[i, 11+deltaX] = Block.block;
+            }
+            colorData = new ConsoleColor[30, 20];
             CreateNextFigure();
             CurrentFigure = new Figure(NextFigure.FigureType);
             CreateNextFigure();
@@ -49,18 +57,52 @@ namespace tetris
             {
                 for (int j=0; j<CurrentFigure.Size;j++)
                 {
-                    gameField[CurrentFigure.Coord.Y + i, CurrentFigure.Coord.X + j] = CurrentFigure[i, j];
-                    colorData[CurrentFigure.Coord.Y + i, CurrentFigure.Coord.X + j] = CurrentFigure.figureColor;
+                    if (CurrentFigure[i, j] == Block.block)
+                    {
+                        gameField[CurrentFigure.Coord.Y + i, CurrentFigure.Coord.X + j + deltaX+1] = CurrentFigure[i, j];
+                        colorData[CurrentFigure.Coord.Y + i, CurrentFigure.Coord.X + j + deltaX+1] = CurrentFigure.figureColor;
+                    }
                 }
             }
             CheckRows();
         }
         void CheckRows()
         {
-
+            int multyplayer = 0;
+            int blockcounter = 0;
+            for (int i=0;i<20;i++)
+            {
+                blockcounter = 0;
+                for (int j=deltaX+1;j<10+deltaX+1;j++)
+                {
+                    if (gameField[i,j]==Block.block)
+                    {
+                        blockcounter++;
+                    }
+                }
+                if (blockcounter==10)
+                {
+                    multyplayer += 1;
+                    deleteRow(i);
+                }
+            }
+            score += scoreDelta * multyplayer;
+            RePrintGame();
+        }
+        void deleteRow(int row)
+        {
+            for (int i=row;i>0;i--)
+            {
+                for (int j=deltaX+1;j<10+deltaX+1;j++)
+                {
+                    gameField[i, j] = gameField[i - 1, j];
+                    colorData[i, j] = colorData[i - 1, j];
+                }
+            }
         }
         public void NextTick()
         {
+            cantMove = true;
             CurrentFigure.MoveTo(Rotation.down,this);
             if (landed)
             {
@@ -68,9 +110,23 @@ namespace tetris
                 AddFigureToField();
                 landed = false;
                 CurrentFigure = new Figure(NextFigure.FigureType);
+                if (NextFigure != null)
+                    NextFigure.PaintFigureINBlack();
                 NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)]);
+                NextFigure.Coord = new Point(12, 3);
+                NextFigure.PrintFigure();
             }
-
+            cantMove = false;
+        }
+        public void SetNewDirection(Rotation dir)
+        {
+            if (!cantMove)
+                CurrentFigure.MoveTo(dir,this);
+        }
+        public void RotateFigure(Rotation rot)
+        {
+            if(!cantMove)
+                 CurrentFigure.rotate(rot, this);
         }
         public void RePrintGame()
         {
@@ -83,13 +139,20 @@ namespace tetris
             Console.SetCursorPosition(0, 0);
             for (int i=0;i<20;i++)
             {
-                for (int j=0;j<10;j++)
+                for (int j=deltaX+1;j<10+deltaX+1;j++)
                 {
                     Console.BackgroundColor = colorData[i, j];
                     Console.Write("  ");
                 }
                 Console.SetCursorPosition(0, i+1);
             }
+            NextFigure.PrintFigure();
+            Console.SetCursorPosition(25, 1);
+            Console.Write("Next");
+            Console.SetCursorPosition(25, 10);
+            Console.Write("Score:");
+            Console.SetCursorPosition(25, 11);
+            Console.Write(score);
         }
     }
 }
