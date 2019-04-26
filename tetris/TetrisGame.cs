@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace tetris
 {
-    class TetrisGame
+    public class TetrisGame
     {
         bool cantMove = false;
         int deltaX = 5;
@@ -32,7 +32,7 @@ namespace tetris
             return false;
         }
         public TetrisGame()
-        {
+        {            
             gameField = new Block[30, 20];
             for (int i = 0; i < 20; i++)
                 gameField[20, i] = Block.block;
@@ -103,7 +103,7 @@ namespace tetris
         public void NextTick()
         {
             cantMove = true;
-            CurrentFigure.MoveTo(Rotation.down,this);
+            FigureMoover.MoveTo(CurrentFigure, Rotation.down, this);
             if (landed)
             {
                 Random rnd = new Random();
@@ -111,22 +111,22 @@ namespace tetris
                 landed = false;
                 CurrentFigure = new Figure(NextFigure.FigureType);
                 if (NextFigure != null)
-                    NextFigure.PaintFigureINBlack();
+                    Printer.PaintFigureBlack(NextFigure);
                 NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)]);
                 NextFigure.Coord = new Point(12, 3);
-                NextFigure.PrintFigure();
+                Printer.PrintFigure(NextFigure);
             }
             cantMove = false;
         }
         public void SetNewDirection(Rotation dir)
         {
             if (!cantMove)
-                CurrentFigure.MoveTo(dir,this);
+                FigureMoover.MoveTo(CurrentFigure, dir, this);                
         }
         public void RotateFigure(Rotation rot)
         {
-            if(!cantMove)
-                 CurrentFigure.rotate(rot, this);
+            if (!cantMove)
+                FigureRotator.Rotate(CurrentFigure, rot, this);
         }
         public void RePrintGame()
         {
@@ -146,7 +146,7 @@ namespace tetris
                 }
                 Console.SetCursorPosition(0, i+1);
             }
-            NextFigure.PrintFigure();
+            Printer.PrintFigure(NextFigure);
             Console.SetCursorPosition(25, 1);
             Console.Write("Next");
             Console.SetCursorPosition(25, 10);
