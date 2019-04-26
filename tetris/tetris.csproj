@@ -42,11 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Figure.cs" />
-    <Compile Include="FigureFabric.cs" />
-    <Compile Include="FigureMoover.cs" />
-    <Compile Include="FigureRotator.cs" />
-    <Compile Include="Printer.cs" />
+    <Compile Include="Figure\Figure.cs" />
+    <Compile Include="Figure\FigureFabric.cs" />
+    <Compile Include="Figure\FigureMoover.cs" />
+    <Compile Include="Figure\FigureRotator.cs" />
+    <Compile Include="Figure\Printer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strucs.cs" />

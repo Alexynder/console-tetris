@@ -8,6 +8,7 @@ namespace tetris
 {
     public class TetrisGame
     {
+        Random rnd = new Random();
         bool cantMove = false;
         int deltaX = 5;
         public bool landed = false;
@@ -48,7 +49,6 @@ namespace tetris
         }
         void CreateNextFigure()
         {
-            Random rnd = new Random();
             NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)]);
         }
         void AddFigureToField()
@@ -106,7 +106,6 @@ namespace tetris
             FigureMoover.MoveTo(CurrentFigure, Rotation.down, this);
             if (landed)
             {
-                Random rnd = new Random();
                 AddFigureToField();
                 landed = false;
                 CurrentFigure = new Figure(NextFigure.FigureType);
