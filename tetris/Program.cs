@@ -20,9 +20,12 @@ namespace tetris
             game.RePrintGame();
             FigurePosKeyPressed += game.SetNewDirection;
             RotateFigureEvent += game.RotateFigure;
-            Thread keyReader = new Thread(new ThreadStart(KeyReader));
-            keyReader.Name = "KeyPressRegister";
+            Thread keyReader = new Thread(new ThreadStart(KeyReader))
+            {
+                Name = "KeyPressRegister"
+            };
             keyReader.Start();
+            game.CreateNextFigure();
             while (true)
             {
                 Tick(delay, game);

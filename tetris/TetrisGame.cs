@@ -47,7 +47,7 @@ namespace tetris
             CurrentFigure = new Figure(NextFigure.FigureType);
             CreateNextFigure();
         }
-        void CreateNextFigure()
+        public void CreateNextFigure()
         {
             NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)]);
         }
@@ -77,8 +77,10 @@ namespace tetris
                 CurrentFigure = new Figure(NextFigure.FigureType);
                 if (NextFigure != null)
                     Printer.PaintFigureBlack(NextFigure);
-                NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)]);
-                NextFigure.Coord = new Point(12, 3);
+                NextFigure = new Figure(blockTypes[rnd.Next(0, blockTypes.Length)])
+                {
+                    Coord = new Point(12, 3)
+                };
                 Printer.PrintFigure(NextFigure);
             }
             cantMove = false;
