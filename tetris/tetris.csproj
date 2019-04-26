@@ -49,6 +49,7 @@
     <Compile Include="Figure\Printer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RowHandler.cs" />
     <Compile Include="Strucs.cs" />
     <Compile Include="TetrisGame.cs" />
     <Compile Include="Tools.cs" />

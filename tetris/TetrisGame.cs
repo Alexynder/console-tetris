@@ -9,13 +9,13 @@ namespace tetris
     public class TetrisGame
     {
         Random rnd = new Random();
-        bool cantMove = false;
-        int deltaX = 5;
+        public bool cantMove = false;
+        public int deltaX = 5;
         public bool landed = false;
-        Block[,] gameField;
+        public Block[,] gameField;
         public int score;
         public int scoreDelta = 100;
-        ConsoleColor[,] colorData;
+        public ConsoleColor[,] colorData;
         private readonly char[] blockTypes = { 'I', 'J', 'L', 'O', 'S', 'T', 'Z' };
         public Figure NextFigure;
         public Figure CurrentFigure;
@@ -64,41 +64,7 @@ namespace tetris
                     }
                 }
             }
-            CheckRows();
-        }
-        void CheckRows()
-        {
-            int multyplayer = 0;
-            int blockcounter = 0;
-            for (int i=0;i<20;i++)
-            {
-                blockcounter = 0;
-                for (int j=deltaX+1;j<10+deltaX+1;j++)
-                {
-                    if (gameField[i,j]==Block.block)
-                    {
-                        blockcounter++;
-                    }
-                }
-                if (blockcounter==10)
-                {
-                    multyplayer += 1;
-                    deleteRow(i);
-                }
-            }
-            score += scoreDelta * multyplayer;
-            RePrintGame();
-        }
-        void deleteRow(int row)
-        {
-            for (int i=row;i>0;i--)
-            {
-                for (int j=deltaX+1;j<10+deltaX+1;j++)
-                {
-                    gameField[i, j] = gameField[i - 1, j];
-                    colorData[i, j] = colorData[i - 1, j];
-                }
-            }
+            RowHandler.CheckRows(this);
         }
         public void NextTick()
         {
